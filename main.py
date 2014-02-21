@@ -26,15 +26,20 @@ class MonsoonBot(SingleServerIRCBot):
 		message = e.arguments[0]
 
 		if self.is_authorized(sender):
-			print '*%s* %s' % (sender, message)
+			self.process_command(sender, message)
 
 	def on_privnotice(self, c, e):
 		sender = e.source.nick
 		message = e.arguments[0]
-		print self.channels.keys()
 
 		if self.is_authorized(sender):
-			print '!%s! %s' % (sender, message)
+			self.process_command(sender, message)
+
+	def process_command(self, sender, message):
+		print '*%s* %s' % (sender, message)
+		
+		if message == 'close':
+			self.disconnect()
 
 if __name__ == '__main__':
 
