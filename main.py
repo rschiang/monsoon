@@ -24,23 +24,23 @@ class MonsoonBot(SingleServerIRCBot):
 	def on_privmsg(self, c, e):
 		sender = e.source.nick
 		message = e.arguments[0]
-
-		if self.is_authorized(sender):
-			self.process_command(sender, message)
-
-	def on_privnotice(self, c, e):
-		sender = e.source.nick
-		message = e.arguments[0]
-
-		if self.is_authorized(sender):
-			self.process_command(sender, message)
-
-	def process_command(self, sender, message):
 		print '*%s* %s' % (sender, message)
-		
-		if message == 'close':
+
+		if self.is_authorized(sender):
+			self.process_command(message)
+		else:
+			c.notice(sender, "Hi, this is Monsoon.")
+
+	def process_command(self, message):
+		if message == 'halt':
+			# Shuts the connection and keep idle
+			self.ircobj.disconnect_all()
+
+		elif message == 'close':
+			# Tore down the whole process
 			self.ircobj.disconnect_all()
 			import sys; sys.exit()
+
 
 if __name__ == '__main__':
 
