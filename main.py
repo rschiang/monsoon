@@ -39,7 +39,8 @@ class MonsoonBot(SingleServerIRCBot):
 		print '*%s* %s' % (sender, message)
 		
 		if message == 'close':
-			self.disconnect()
+			self.ircobj.disconnect_all()
+			import sys; sys.exit()
 
 if __name__ == '__main__':
 
