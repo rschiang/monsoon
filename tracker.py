@@ -12,6 +12,7 @@ os.getlogin = lambda: config.logging_name or 'Monsoon'
 
 from git import *
 from codecs import open
+from threading import Lock
 
 class TrendTracker(object):
 
@@ -19,9 +20,11 @@ class TrendTracker(object):
 		self.users = {}
 		self.words = {}
 		self.log = []
+		self.lock = Lock()
 		self.initialize()
 
 	def initialize(self):
+		self.lock.acquire()
 		if config.logging_repo:
 			# Initialize clean repo
 			from shutil import rmtree
@@ -42,8 +45,12 @@ class TrendTracker(object):
 			except IOError:
 				print 'No statistic to resume from.'
 				return
+				
+		self.lock.release()
 
 	def track_message(self, user, message):
+		self.lock.acquire()
+
 		# Append statistics
 		self.users[user] = self.users.get(user, 0) + 1
 		
@@ -57,6 +64,8 @@ class TrendTracker(object):
 				'text': message,
 			})
 
+		self.lock.release()
+
 	def get_user_trend(self, limit=5):
 		return sorted(self.users.keys(), key=lambda x: self.users[x], reverse=True)[:limit]
 
@@ -64,6 +73,7 @@ class TrendTracker(object):
 		return sorted([k for k in self.words.keys() if len(k) > 1], key=lambda x: self.words[x], reverse=True)[:limit]
 
 	def sync(self):
+		self.lock.acquire()
 		if config.logging_repo:			
 			repo = Repo('log/')
 
@@ -104,3 +114,5 @@ class TrendTracker(object):
 				repo.remotes.origin.push()
 			except:
 				traceback.print_exc(); return
+
+		self.lock.release()
