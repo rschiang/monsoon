@@ -76,10 +76,24 @@ def tokenize(text):
 					break
 				else:
 					buf += token
+					j += 1
 
 			if len(buf) > 1 and buf not in unit_tokens:
 				unit_tokens.append(buf)
+			
+			i = j + 1
 
 		tokens.extend(unit_tokens)
 
 	return tokens
+
+if __name__ == '__main__':
+	initialize()
+
+	from sys import stdin
+	while True:
+		try:
+			line = stdin.readline()
+			print '|'.join(tokenize(line))
+		except KeyboardInterrupt:
+			break
