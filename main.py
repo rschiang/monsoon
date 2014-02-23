@@ -1,11 +1,13 @@
 #! /usr/bin/python
 import config
 import tokenizer
+from tracker import TrendTracker
 from irc.bot import SingleServerIRCBot
 
 class MonsoonBot(SingleServerIRCBot):
 
 	def __init__(self):
+		self.tracker = TrendTracker()
 		super(MonsoonBot, self).__init__([(config.server, config.port)], config.nickname, config.nickname, 2)
 
 	def is_authorized(self, sender):
@@ -20,7 +22,7 @@ class MonsoonBot(SingleServerIRCBot):
 	def on_pubmsg(self, c, e):
 		sender = e.source.nick
 		message = e.arguments[0]
-		print '<%s> %s' % (sender, message)
+		self.tracker.track_message(sender, message)
 
 	def on_privmsg(self, c, e):
 		sender = e.source.nick
@@ -28,12 +30,20 @@ class MonsoonBot(SingleServerIRCBot):
 		print '*%s* %s' % (sender, message)
 
 		if self.is_authorized(sender):
-			self.process_command(message)
+			self.process_command(c, (sender, message))
 		else:
 			c.notice(sender, "Hi, this is Monsoon.")
 
-	def process_command(self, message):
-		if message == 'halt':
+	def process_command(self, c, e):
+		sender, message = e
+		if message == 'stat':
+			trend = self.tracker.get_keyword_trend()
+			c.notice(sender, "Trending keywords: %s" % ', '.join(trend))
+
+			trend = self.tracker.get_user_trend()
+			c.notice(sender, "Most active users: %s" % ', '.join(trend))
+
+		elif message == 'halt':
 			# Shuts the connection and keep idle
 			self.ircobj.disconnect_all()
 
