@@ -102,7 +102,8 @@ class TrendTracker(object):
 				# First 10 chars of ISO format is date
 				print "--> writing IRC log of day %s" % date
 				with open('log/%s.log' % date, 'a+', encoding='utf8') as f:
-					json.dump(list(group), f, ensure_ascii=False, indent=4)
+					for entry in group:
+						f.write('[%s] <%s> %s\n' % (group['time'], group['user'], group['text']))
 
 				repo.index.add(['%s.log' % date])
 
