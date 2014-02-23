@@ -1,7 +1,7 @@
 from codecs import open
 
 # Use MoeDict MeeGo's index. Available at github.com/rschiang/moedict-meego/
-with index = open('../vendor/moedict/index.json', 'r', encoding='utf8')
+with open('../vendor/moedict/index.json', 'r', encoding='utf8') as index:
 	q = {}
 	for k in e:
 		i = e[k]
@@ -21,6 +21,6 @@ with index = open('../vendor/moedict/index.json', 'r', encoding='utf8')
 					if t in l: continue
 					q[k] = l + [t]
 
-with output = open('../vendor/moedict.dict', 'w+', encoding='utf8'):
+with open('../vendor/moedict.dict', 'w+', encoding='utf8') as output:
 	for k in q:
 		output.write('%s %s\n' % (k, ','.join(q[k])))

@@ -19,8 +19,8 @@ def initialize():
 	CONJUNCTIONS = []
 	
 	from codecs import open
-	with dic = open('vendor/moedict.dict', 'r', encoding='utf8'):
-		for entry in dic:
+	with open('vendor/moedict.dict', 'r', encoding='utf8') as data:
+		for entry in data:
 			CONJUNCTIONS.append(entry.split()[0])
 	
 	# Load CJK parsing library
