@@ -23,6 +23,11 @@ class TrendTracker(object):
 			from shutil import rmtree
 			if os.path.exists('log/'): rmtree('log/')
 			repo = Repo.clone_from(config.logging_repo, 'log/')
+			
+			# Bootstrap configurations
+			conf = repo.config_writer()
+			conf.set_value('user', 'name', config.logging_name or 'Monsoon')
+			conf.set_value('user', 'email', config.logging_email or 'monsoon@sitcon.org')
 
 			try:
 				with open('log/statistics.json', 'r', encoding='utf8') as f:
@@ -88,8 +93,7 @@ class TrendTracker(object):
 				repo.index.add(['%s.log' % date])
 
 			repo.index.add(['statistics.json', 'trends.json'])
-			repo.index.commit('Updating log %s' % datetime.utcnow().isoformat(), 
-				author=(config.logging_author or 'Monsoon <monsoon@sitcon.org>'))
+			repo.index.commit('Updating log %s' % datetime.utcnow().isoformat())
 
 			print "--> pushing to remote repository."
 			try:
