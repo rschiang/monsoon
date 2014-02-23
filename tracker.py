@@ -19,7 +19,7 @@ class TrendTracker(object):
 		return sorted(self.users.keys(), key=lambda x: self.users[x], reverse=True)[:limit]
 
 	def get_keyword_trend(self, limit=10):
-		return sorted(self.words.keys(), key=lambda x: self.words[x], reverse=True)[:limit]
+		return sorted([k in self.words.keys() if len(k) > 1], key=lambda x: self.words[x], reverse=True)[:limit]
 
 	def sync(self):
 		pass
