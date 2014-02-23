@@ -61,7 +61,8 @@ def tokenize(text):
 	tokens += ASCII_SLUG_RE.findall(text)	# ASCII tokens are already usable
 
 	for unit in CJK_SLUG_RE.findall(text):	# CJK tokens need extraction
-		unit_tokens = jieba.cut_for_search(unit)	# Might return ambiguous result
+		# Search engine mode. Might return ambiguous result
+		unit_tokens = list(jieba.cut_for_search(unit))
 
 		# Make better word guessing by joining non-conjunction words
 		i = 0
