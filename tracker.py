@@ -4,6 +4,7 @@ from datetime import datetime
 
 # Used for repo synchornization
 import json
+import os
 from git import *
 from codecs import open
 
@@ -17,10 +18,15 @@ class TrendTracker(object):
 
 	def initialize(self):
 		if config.logging_repo:
+			# Initialize clean repo
+			if os.path.exists('log/'):
+				os.rmdir('log/')
 			repo = Repo.clone_from(config.logging_repo, 'log/')
-			with repo.config_writer() as conf:
-				conf.set_value('user', 'name', config.logging_name or 'Monsoon')
-				conf.set_value('user', 'email', config.logging_email or 'monsoon@sitcon.org')
+			
+			# Bootstrap configurations
+			conf = repo.config_writer()
+			conf.set_value('user', 'name', config.logging_name or 'Monsoon')
+			conf.set_value('user', 'email', config.logging_email or 'monsoon@sitcon.org')
 
 			try:
 				with open('log/statistics.json', 'r', encoding='utf8') as f:
@@ -50,7 +56,7 @@ class TrendTracker(object):
 		return sorted(self.users.keys(), key=lambda x: self.users[x], reverse=True)[:limit]
 
 	def get_keyword_trend(self, limit=10):
-		return sorted([k in self.words.keys() if len(k) > 1], key=lambda x: self.words[x], reverse=True)[:limit]
+		return sorted([k for k in self.words.keys() if len(k) > 1], key=lambda x: self.words[x], reverse=True)[:limit]
 
 	def sync(self):
 		if config.logging_repo:
