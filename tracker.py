@@ -4,6 +4,7 @@ from datetime import datetime
 
 # Used for repo synchornization
 import json
+import traceback
 from git import *
 from codecs import open
 
@@ -59,17 +60,24 @@ class TrendTracker(object):
 		return sorted([k for k in self.words.keys() if len(k) > 1], key=lambda x: self.words[x], reverse=True)[:limit]
 
 	def sync(self):
-		if config.logging_repo:
+		if config.logging_repo:			
 			repo = Repo('log/')
-			repo.remotes.origin.pull(rebase=True)
+
+			print "--> pulling remote repository."
+			try:
+				repo.remotes.origin.pull(rebase=True)
+			except:
+				traceback.print_exc(); return
 
 			with open('log/statistics.json', 'w+', encoding='utf8') as f:
+				print "--> writing statistics."
 				json.dump({
 					'users': self.users,
 					'words': self.words, 
 					}, f, ensure_ascii=False, indent=4)
 
 			with open('log/trends.json', 'w+', encoding='utf8') as f:
+				print "--> writing trends."
 				json.dump({
 					'users': self.get_user_trend(),
 					'words': self.get_keyword_trend(),
@@ -78,6 +86,7 @@ class TrendTracker(object):
 			from itertools import groupby
 			for date, group in groupby(self.log, lambda x: x['time'][:10]):
 				# First 10 chars of ISO format is date
+				print "--> writing IRC log of day %s" % date
 				with open('log/%s.log' % date, 'a+', encoding='utf8') as f:
 					json.dump(list(group), f, ensure_ascii=False, indent=4)
 
@@ -86,4 +95,8 @@ class TrendTracker(object):
 			repo.index.add(['statistics.json', 'trends.json'])
 			repo.index.commit('Updating log %s' % datetime.utcnow().isoformat())
 
-			repo.remotes.origin.push()
+			print "--> pushing to remote repository."
+			try:
+				repo.remotes.origin.push()
+			except:
+				traceback.print_exc(); return
