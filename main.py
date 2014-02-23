@@ -3,13 +3,13 @@ import config
 import tokenizer
 from tracker import TrendTracker
 from irc.bot import SingleServerIRCBot
-from threading import Thread, Event
+from worker import SyncThread
 
 class MonsoonBot(SingleServerIRCBot):
 
 	def __init__(self):
 		self.tracker = TrendTracker()
-		self.sync_thread = SyncThread()
+		self.sync_thread = SyncThread(self)
 		super(MonsoonBot, self).__init__([(config.server, config.port)], config.nickname, config.nickname, 2)
 		self.sync_thread.start()
 
@@ -66,27 +66,7 @@ class MonsoonBot(SingleServerIRCBot):
 		else:
 			c.notice(sender, "Unknown command, please retry.")
 
-	class SyncThread(Thread):
 
-		def __init__(self):
-			Thread.__init__(self)
-			self.event = Event()
-			self.elapsed = 0
-			self.interval = 300
-
-		def run(self):
-			while not self.event.is_set():
-				if self.elapsed < self.interval:
-					self.elapsed += 1
-					self.event.wait(1)
-				else:
-					self.elapsed = 0
-
-					print "Starting periodic synchornization."
-					self.tracker.sync()
-
-		def stop(self):
-			self.event.set()
 
 if __name__ == '__main__':
 
