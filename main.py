@@ -1,5 +1,6 @@
 #! /usr/bin/python
 import config
+import tokenizer
 from irc.bot import SingleServerIRCBot
 
 class MonsoonBot(SingleServerIRCBot):
@@ -47,6 +48,9 @@ if __name__ == '__main__':
 	# Set loose decoding constraint
 	from irc.client import ServerConnection
 	ServerConnection.buffer_class.errors = 'replace'
+
+	# Load tokenizer
+	tokenizer.initialize()
 
 	bot = MonsoonBot()
 	bot.start()

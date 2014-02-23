@@ -1,4 +1,5 @@
 import re
+import jieba
 
 URL_LIKE_RE = re.compile(ur'\b[a-z]+:/*[a-z0-9\-\._~:/\?#@!$&\+=]+', flags=re.IGNORECASE)
 
@@ -9,6 +10,11 @@ CJK_SLUG_RE = re.compile(u'([' + CJK_CHAR_RANGE + u']+)')
 
 ASCII_SLUG = ur'[a-z_][a-z0-9\-_\.]*'
 ASCII_SLUG_RE = re.compile(u'[#@]?(' + ASCII_SLUG + u')', flags=re.IGNORECASE)
+
+def initialize():
+	jieba.set_dictionary('vendor/jieba_tc.dict')
+	jieba.load_userdict('vendor/chewing.dict')
+	jieba.initialize()
 
 # Add whitespace between CJK characters
 def preprocess_cjk(text):
@@ -43,7 +49,6 @@ def tokenize(text):
 	tokens += ASCII_SLUG_RE.findall(text)	# ASCII tokens are already usable
 
 	for unit in CJK_SLUG_RE.findall(text):	# CJK tokens need extraction
-			# TODO: Parse
-			tokens.append(unit)
+		tokens.extend(jieba.cut_for_search(unit))
 
 	return tokens
