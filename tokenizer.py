@@ -11,7 +11,19 @@ CJK_SLUG_RE = re.compile(u'([' + CJK_CHAR_RANGE + u']+)')
 ASCII_SLUG = ur'[a-z_][a-z0-9\-_\.]*'
 ASCII_SLUG_RE = re.compile(u'[#@]?(' + ASCII_SLUG + u')', flags=re.IGNORECASE)
 
+CONJUNCTIONS = None
+
 def initialize():
+	# Load conjuction data
+	global CONJUNCTIONS
+	CONJUNCTIONS = []
+	
+	from codecs import open
+	with dic = open('vendor/moedict.dict', 'r', encoding='utf8'):
+		for entry in dic:
+			CONJUNCTIONS.append(entry.split()[0])
+	
+	# Load CJK parsing library
 	jieba.set_dictionary('vendor/jieba_tc.dict')
 	jieba.load_userdict('vendor/chewing.dict')
 	jieba.initialize()
@@ -49,6 +61,24 @@ def tokenize(text):
 	tokens += ASCII_SLUG_RE.findall(text)	# ASCII tokens are already usable
 
 	for unit in CJK_SLUG_RE.findall(text):	# CJK tokens need extraction
-		tokens.extend(jieba.cut_for_search(unit))
+		unit_tokens = jieba.cut_for_search(unit)	# Might return ambiguous result
+
+		# Make better word guessing by joining non-conjunction words
+		i = 0
+		length = len(unit_tokens)
+		while i < length:
+			j = i
+			buf = ''
+			while j < length:
+				token = unit_tokens[j]
+				if token in CONJUNCTIONS or len(token) > 1:
+					break
+				else:
+					buf += token
+
+			if len(buf) > 1 and buf not in unit_tokens:
+				unit_tokens.append(buf)
+
+		tokens.extend(unit_tokens)
 
 	return tokens
