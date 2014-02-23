@@ -5,6 +5,11 @@ from datetime import datetime
 # Used for repo synchornization
 import json
 import traceback
+
+# Workaround to solve os.getlogin issue in git-python
+import os
+os.getlogin = lambda: config.logging_name or 'Monsoon'
+
 from git import *
 from codecs import open
 
@@ -19,7 +24,6 @@ class TrendTracker(object):
 	def initialize(self):
 		if config.logging_repo:
 			# Initialize clean repo
-			import os
 			from shutil import rmtree
 			if os.path.exists('log/'): rmtree('log/')
 			repo = Repo.clone_from(config.logging_repo, 'log/')
