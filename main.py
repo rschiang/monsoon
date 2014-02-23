@@ -36,12 +36,18 @@ class MonsoonBot(SingleServerIRCBot):
 
 	def process_command(self, c, e):
 		sender, message = e
+
 		if message == 'stat':
 			trend = self.tracker.get_keyword_trend()
 			c.notice(sender, "Trending keywords: %s" % ', '.join(trend))
 
 			trend = self.tracker.get_user_trend()
 			c.notice(sender, "Most active users: %s" % ', '.join(trend))
+
+		elif message == 'sync':
+			c.notice(sender, "Syncing trend information...")
+			self.tracker.sync()
+			c.notice("Done with sync works.")
 
 		elif message == 'halt':
 			# Shuts the connection and keep idle
@@ -51,6 +57,9 @@ class MonsoonBot(SingleServerIRCBot):
 			# Tore down the whole process
 			self.ircobj.disconnect_all()
 			import sys; sys.exit()
+
+		else:
+			c.notice("Unknown command, please retry.")
 
 
 if __name__ == '__main__':
