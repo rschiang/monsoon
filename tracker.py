@@ -4,7 +4,6 @@ from datetime import datetime
 
 # Used for repo synchornization
 import json
-import os
 from git import *
 from codecs import open
 
@@ -19,8 +18,9 @@ class TrendTracker(object):
 	def initialize(self):
 		if config.logging_repo:
 			# Initialize clean repo
-			if os.path.exists('log/'):
-				os.rmdir('log/')
+			import os
+			from shutil import rmtree
+			if os.path.exists('log/'): rmtree('log/')
 			repo = Repo.clone_from(config.logging_repo, 'log/')
 			
 			# Bootstrap configurations

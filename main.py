@@ -47,7 +47,7 @@ class MonsoonBot(SingleServerIRCBot):
 		elif message == 'sync':
 			c.notice(sender, "Syncing trend information...")
 			self.tracker.sync()
-			c.notice("Done with sync works.")
+			c.notice(sender, "Done with sync works.")
 
 		elif message == 'halt':
 			# Shuts the connection and keep idle
@@ -59,7 +59,7 @@ class MonsoonBot(SingleServerIRCBot):
 			import sys; sys.exit()
 
 		else:
-			c.notice("Unknown command, please retry.")
+			c.notice(sender, "Unknown command, please retry.")
 
 
 if __name__ == '__main__':
