@@ -9,4 +9,5 @@ channel = '#sitcon'
 
 # Setting this to empty string disables syncing
 logging_repo = 'https://github.com/rschiang/monsoon-irc.git'
-logging_author = ''
+logging_name = ''
+logging_email = ''
