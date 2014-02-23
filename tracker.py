@@ -63,6 +63,12 @@ class TrendTracker(object):
 					'words': self.words, 
 					}, f, ensure_ascii=False, indent=4)
 
+			with open('log/trends.json', 'w+', encoding='utf8') as f:
+				json.dump({
+					'users': self.get_user_trend(),
+					'words': self.get_keyword_trend(),
+					}, f, ensure_ascii=False, indent=4)
+
 			from itertools import groupby
 			for date, group in groupby(self.log, lambda x: x['time'][:10]):
 				# First 10 chars of ISO format is date
@@ -71,7 +77,7 @@ class TrendTracker(object):
 
 				repo.index.add(['%s.log' % date])
 
-			repo.index.add(['statistics.json'])
+			repo.index.add(['statistics.json', 'trends.json'])
 			repo.index.commit('Updating log %s' % datetime.utcnow().isoformat())
 
 			repo.remotes.origin.push()
