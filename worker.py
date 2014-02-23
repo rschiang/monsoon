@@ -17,8 +17,8 @@ class SyncThread(Thread):
 			else:
 				self.elapsed = 0
 
-				print "Starting periodic synchornization."
-				parent.tracker.sync()
+				print "Starting periodic synchronization."
+				self.parent.tracker.sync()
 
 	def stop(self):
 		self.event.set()
