@@ -103,7 +103,7 @@ class TrendTracker(object):
 				print "--> writing IRC log of day %s" % date
 				with open('log/%s.log' % date, 'a+', encoding='utf8') as f:
 					for entry in group:
-						f.write('[%s] <%s> %s\n' % (group['time'], group['user'], group['text']))
+						f.write('[%s] <%s> %s\n' % (entry['time'], entry['user'], entry['text']))
 
 				repo.index.add(['%s.log' % date])
 
