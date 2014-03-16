@@ -39,6 +39,7 @@ class MonsoonBot(SingleServerIRCBot):
 
 	def process_command(self, c, e):
 		sender, message = e
+		arguments = message.split(' ')
 
 		if message == 'stat':
 			trend = self.tracker.get_keyword_trend()
@@ -51,6 +52,13 @@ class MonsoonBot(SingleServerIRCBot):
 			c.notice(sender, "Syncing trend information...")
 			self.tracker.sync()
 			c.notice(sender, "Done with sync works.")
+
+		elif arguments[0] == "import":
+			if len(arguments) < 2:
+				c.notice(sender, "You must specify a log date.")
+			else:
+				self.tracker.import_log(arguments[1])
+				c.notice(sender, "Done with importing.")
 
 		elif message == 'halt':
 			# Shuts the connection and keep idle

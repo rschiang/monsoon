@@ -3,6 +3,7 @@ from tokenizer import tokenize
 from datetime import datetime
 
 # Used for repo synchornization
+import re
 import json
 import traceback
 
@@ -66,10 +67,10 @@ class TrendTracker(object):
 
 		self.lock.release()
 
-	def get_user_trend(self, limit=5):
+	def get_user_trend(self, limit=20):
 		return sorted(self.users.keys(), key=lambda x: self.users[x], reverse=True)[:limit]
 
-	def get_keyword_trend(self, limit=10):
+	def get_keyword_trend(self, limit=20):
 		return sorted([k for k in self.words.keys() if len(k) > 1], key=lambda x: self.words[x], reverse=True)[:limit]
 
 	def sync(self):
@@ -81,7 +82,8 @@ class TrendTracker(object):
 			try:
 				repo.remotes.origin.pull(rebase=True)
 			except:
-				traceback.print_exc(); return
+				traceback.print_exc()
+				self.lock.release(); return
 
 			with open('log/statistics.json', 'w+', encoding='utf8') as f:
 				print "--> writing statistics."
@@ -115,5 +117,29 @@ class TrendTracker(object):
 				repo.remotes.origin.push()
 			except:
 				traceback.print_exc(); return
+
+		self.lock.release()
+
+	def import_log(self, date):
+		self.lock.acquire()
+		if config.logging_repo:
+			try:
+				r = re.compile(r'^\[([\d\-T:\.]+)\] <([a-zA-Z0-9_\-\|\[\]]+)> (.+)$')
+				with open('log/%s.log' % date, 'r', encoding='utf8') as f:
+					print "--> importing %s.log" % date
+					for entry in f:
+						data = r.match(entry)
+						if not data:
+							continue
+						else:
+							timestamp, user, message = data.groups()
+
+						self.users[user] = self.users.get(user, 0) + 1
+						
+						for word in tokenize(message):
+							self.words[word] = self.words.get(word, 0) + 1
+
+			except IOError:
+				print "--> file %s.log not found" % date
 
 		self.lock.release()
