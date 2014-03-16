@@ -25,7 +25,9 @@ class MonsoonBot(SingleServerIRCBot):
 	def on_pubmsg(self, c, e):
 		sender = e.source.nick
 		message = e.arguments[0]
-		self.tracker.track_message(sender, message)
+
+		if sender != c.get_nickname():
+			self.tracker.track_message(sender, message)
 
 	def on_privmsg(self, c, e):
 		sender = e.source.nick
@@ -41,14 +43,19 @@ class MonsoonBot(SingleServerIRCBot):
 		sender, message = e
 		arguments = message.split(' ')
 
-		if message == 'stat':
+		if arguments[0] == 'stat':
+			if len(arguments) > 1 and arguments[1] == 'announce':
+				target = config.channel 	# Send back to channel
+			else:
+				target = sender
+
 			trend = self.tracker.get_keyword_trend()
-			c.notice(sender, "Trending keywords: %s" % ', '.join(trend))
+			c.notice(target, "Trending keywords: %s" % ', '.join(trend))
 
 			trend = self.tracker.get_user_trend()
-			c.notice(sender, "Most active users: %s" % ', '.join(trend))
+			c.notice(target, "Most active users: %s" % ', '.join(trend))
 
-		elif message == 'sync':
+		elif arguments[0] == 'sync':
 			c.notice(sender, "Syncing trend information...")
 			self.tracker.sync()
 			c.notice(sender, "Done with sync works.")
@@ -60,12 +67,12 @@ class MonsoonBot(SingleServerIRCBot):
 				self.tracker.import_log(arguments[1])
 				c.notice(sender, "Done with importing.")
 
-		elif message == 'halt':
+		elif arguments[0] == 'halt':
 			# Shuts the connection and keep idle
 			self.ircobj.disconnect_all()
 			self.sync_thread.stop()
 
-		elif message == 'close':
+		elif arguments[0] == 'close':
 			# Tore down the whole process
 			self.ircobj.disconnect_all()
 			self.sync_thread.stop()
